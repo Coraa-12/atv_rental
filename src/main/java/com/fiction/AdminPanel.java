@@ -13,7 +13,7 @@ public class AdminPanel extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("ATV Rental Admin Panel");
+        primaryStage.setTitle("ATV Rental Admin Panel");  // Changed title for ATV rentals
 
         // Layouts
         BorderPane mainLayout = new BorderPane();
@@ -33,7 +33,7 @@ public class AdminPanel extends Application {
         rentalForm.getChildren().addAll(
             new Label("New Rental"),
             customerNameField,
-            atvIdField,
+            atvIdField,  // Updated to ATV ID
             rentalDurationField,
             paymentAmountField,
             submitButton
@@ -43,7 +43,7 @@ public class AdminPanel extends Application {
         TableView<RentalRecord> rentalTable = new TableView<>();
         TableColumn<RentalRecord, String> rentalIdCol = new TableColumn<>("Rental ID");
         TableColumn<RentalRecord, String> customerNameCol = new TableColumn<>("Customer Name");
-        TableColumn<RentalRecord, String> atvIdCol = new TableColumn<>("ATV ID");
+        TableColumn<RentalRecord, String> atvIdCol = new TableColumn<>("ATV ID");  // Changed column name to ATV ID
         TableColumn<RentalRecord, String> startTimeCol = new TableColumn<>("Start Time");
         TableColumn<RentalRecord, String> endTimeCol = new TableColumn<>("End Time");
         TableColumn<RentalRecord, String> statusCol = new TableColumn<>("Status");
@@ -55,7 +55,7 @@ public class AdminPanel extends Application {
         // Bind columns
         rentalIdCol.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
         customerNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        atvIdCol.setCellValueFactory(new PropertyValueFactory<>("atvId")); 
+        atvIdCol.setCellValueFactory(new PropertyValueFactory<>("atvId"));  // Updated to ATV ID
         startTimeCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -63,9 +63,9 @@ public class AdminPanel extends Application {
 
         // Add event handling for the submit button
         submitButton.setOnAction(e -> {
-            String rentalId = "R" + System.currentTimeMillis();
+            String rentalId = "R" + System.currentTimeMillis(); // Generate a unique rental ID
             String customerName = customerNameField.getText();
-            String atvId = atvIdField.getText(); 
+            String atvId = atvIdField.getText();  // Updated to ATV ID
             String rentalDuration = rentalDurationField.getText();
             Double paymentAmount = Double.parseDouble(paymentAmountField.getText());
             String startTime = java.time.LocalDateTime.now().toString(); // Current time as start time

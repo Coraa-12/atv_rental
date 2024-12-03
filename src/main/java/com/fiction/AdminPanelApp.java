@@ -11,7 +11,7 @@ public class AdminPanelApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("AdminPanel.fxml"));
-        primaryStage.setTitle("ATV Rental Admin Panel");
+        primaryStage.setTitle("ATV Rental Admin Panel");  // Updated title for ATV rentals
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
     }
