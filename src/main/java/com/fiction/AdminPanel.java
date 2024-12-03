@@ -1,6 +1,9 @@
 package com.fiction;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.geometry.Insets;
@@ -48,9 +51,11 @@ public class AdminPanel extends Application {
         TableColumn<RentalRecord, String> endTimeCol = new TableColumn<>("End Time");
         TableColumn<RentalRecord, String> statusCol = new TableColumn<>("Status");
         TableColumn<RentalRecord, String> totalCostCol = new TableColumn<>("Total Cost");
-        rentalTable.getColumns().addAll(
-            rentalIdCol, customerNameCol, atvIdCol, startTimeCol, endTimeCol, statusCol, totalCostCol
+        List<TableColumn<RentalRecord, ?>> columns = Arrays.asList(
+        rentalIdCol, customerNameCol, atvIdCol, startTimeCol, endTimeCol, statusCol, totalCostCol
         );
+        rentalTable.getColumns().addAll(columns);
+
 
         // Bind columns
         rentalIdCol.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
