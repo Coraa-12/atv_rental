@@ -5,36 +5,39 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.fiction.AdminPanelController">
 
     <!-- Label -->
-    <Label text="Welcome to the Admin Panel" layoutX="50" layoutY="50"/>
+    <Label text="Welcome to the ATV Rental Admin Panel" layoutX="50" layoutY="50"/>
 
     <!-- Text fields for input -->
     <Label text="Customer Name:" layoutX="50" layoutY="100"/>
     <TextField fx:id="customerNameField" layoutX="150" layoutY="100" style="-fx-pref-width: 200px;"/>
 
-    <Label text="Scooter ID:" layoutX="50" layoutY="150"/>
-    <TextField fx:id="scooterIdField" layoutX="150" layoutY="150" style="-fx-pref-width: 200px;"/>
+    <Label text="ATV ID:" layoutX="50" layoutY="150"/>
+    <TextField fx:id="atvIdField" layoutX="150" layoutY="150" style="-fx-pref-width: 200px;"/>
 
-    <Label text="Rental Duration (hours):" layoutX="50" layoutY="200"/>
-    <TextField fx:id="rentalDurationField" layoutX="200" layoutY="200" style="-fx-pref-width: 200px;"/>
+    <Label text="Start Time:" layoutX="50" layoutY="200"/>
+    <TextField fx:id="startTimeField" layoutX="150" layoutY="200" style="-fx-pref-width: 200px;" promptText="YYYY-MM-DD HH:MM:SS"/>
 
-    <Label text="Payment Amount:" layoutX="50" layoutY="250"/>
-    <TextField fx:id="paymentAmountField" layoutX="200" layoutY="250" style="-fx-pref-width: 200px;"/>
+    <Label text="End Time:" layoutX="50" layoutY="250"/>
+    <TextField fx:id="endTimeField" layoutX="150" layoutY="250" style="-fx-pref-width: 200px;" promptText="YYYY-MM-DD HH:MM:SS"/>
 
+    <Label text="Status:" layoutX="50" layoutY="300"/>
+    <TextField fx:id="statusField" layoutX="150" layoutY="300" style="-fx-pref-width: 200px;" promptText="e.g., ongoing, completed, cancelled"/>
 
+    <Label text="Total Cost:" layoutX="50" layoutY="350"/>
+    <TextField fx:id="totalCostField" layoutX="150" layoutY="350" style="-fx-pref-width: 200px;"/>
 
     <!-- Submit Button -->
-    <Button text="Submit Rental" layoutX="50" layoutY="300" onAction="#handleSubmit"/>
+    <Button text="Submit Rental" layoutX="50" layoutY="400" onAction="#handleSubmit"/>
 
     <!-- Table to display rental records -->
-    <TableView fx:id="rentalTable" layoutX="50" layoutY="350" prefWidth="600" prefHeight="300">
+    <TableView fx:id="rentalTable" layoutX="50" layoutY="450" prefWidth="700" prefHeight="300">
         <TableColumn fx:id="rentalIdCol" text="Rental ID" prefWidth="100"/>
         <TableColumn fx:id="customerNameCol" text="Customer Name" prefWidth="150"/>
-        <TableColumn fx:id="scooterIdCol" text="Scooter ID" prefWidth="100"/>
+        <TableColumn fx:id="atvIdCol" text="ATV ID" prefWidth="100"/>
         <TableColumn fx:id="startTimeCol" text="Start Time" prefWidth="150"/>
         <TableColumn fx:id="endTimeCol" text="End Time" prefWidth="150"/>
         <TableColumn fx:id="statusCol" text="Status" prefWidth="100"/>

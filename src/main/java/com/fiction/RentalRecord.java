@@ -3,22 +3,24 @@ package com.fiction;
 public class RentalRecord {
     private String rentalId;
     private String customerName;
-    private String scooterId;
+    private String atvId; // Renamed from scooterId
     private String startTime;
     private String endTime;
     private String status;
     private Double totalCost;
 
-    public RentalRecord(String rentalId, String customerName, String scooterId, String startTime, String endTime, String status, Double totalCost) {
+    // Constructor
+    public RentalRecord(String rentalId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost) {
         this.rentalId = rentalId;
         this.customerName = customerName;
-        this.scooterId = scooterId;
+        this.atvId = atvId; // Updated field name
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = status;
         this.totalCost = totalCost;
     }
 
+    // Getters
     public String getRentalId() {
         return rentalId;
     }
@@ -27,8 +29,8 @@ public class RentalRecord {
         return customerName;
     }
 
-    public String getScooterId() {
-        return scooterId;
+    public String getAtvId() { // Updated method name
+        return atvId;
     }
 
     public String getStartTime() {

@@ -10,11 +10,16 @@ public class AdminPanelController {
     @FXML
     private TextField customerNameField;
     @FXML
-    private TextField scooterIdField;
+    private TextField atvIdField;
     @FXML
-    private TextField rentalDurationField;
+    private TextField startTimeField;
     @FXML
-    private TextField paymentAmountField;
+    private TextField endTimeField;
+    @FXML
+    private TextField statusField;
+    @FXML
+    private TextField totalCostField;
+
     @FXML
     private TableView<RentalRecord> rentalTable;
     @FXML
@@ -22,7 +27,7 @@ public class AdminPanelController {
     @FXML
     private TableColumn<RentalRecord, String> customerNameCol;
     @FXML
-    private TableColumn<RentalRecord, String> scooterIdCol;
+    private TableColumn<RentalRecord, String> atvIdCol;
     @FXML
     private TableColumn<RentalRecord, String> startTimeCol;
     @FXML
@@ -36,7 +41,7 @@ public class AdminPanelController {
     public void initialize() {
         rentalIdCol.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
         customerNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        scooterIdCol.setCellValueFactory(new PropertyValueFactory<>("scooterId"));
+        atvIdCol.setCellValueFactory(new PropertyValueFactory<>("atvId"));
         startTimeCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -45,48 +50,49 @@ public class AdminPanelController {
 
     @FXML
     private void handleSubmit() {
-        String rentalId = "R" + System.currentTimeMillis();  // Unique ID based on current time
+        String rentalId = "R" + System.currentTimeMillis(); // Generate unique rental ID
         String customerName = customerNameField.getText();
-        String scooterId = scooterIdField.getText();
-        String rentalDuration = rentalDurationField.getText();
-        String paymentAmount = paymentAmountField.getText();
+        String atvId = atvIdField.getText();
+        String startTime = startTimeField.getText();
+        String endTime = endTimeField.getText();
+        String status = statusField.getText();
+        String totalCostInput = totalCostField.getText();
 
-        // Check if the rental duration and payment amount are valid
-        if (rentalDuration.isEmpty() || paymentAmount.isEmpty()) {
-            // You may want to show an error message if these fields are empty
+        // Validate input
+        if (customerName.isEmpty() || atvId.isEmpty() || startTime.isEmpty() || endTime.isEmpty() || status.isEmpty() || totalCostInput.isEmpty()) {
+            // Optionally, add error messages
+            System.err.println("Please fill all fields.");
             return;
         }
 
-        // Convert rentalDuration to hours (assuming it's in hours)
-        long durationInHours = Long.parseLong(rentalDuration);
-
-        // Calculate start and end times
-        String startTime = java.time.LocalDateTime.now().toString();
-        String endTime = java.time.LocalDateTime.now().plusHours(durationInHours).toString();
-
-        // Set status
-        String status = "Active";
-
-        // Parse payment amount as a double or BigDecimal
-        double totalCost = Double.parseDouble(paymentAmount);
+        // Parse total cost
+        double totalCost;
+        try {
+            totalCost = Double.parseDouble(totalCostInput);
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid total cost value.");
+            return;
+        }
 
         // Create a new RentalRecord
-        RentalRecord newRecord = new RentalRecord(rentalId, customerName, scooterId, startTime, endTime, status, totalCost);
+        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, totalCost);
 
-        // Add new record to the TableView
+        // Add the new record to the TableView
         rentalTable.getItems().add(newRecord);
 
         // Save to database
         try {
-            DatabaseManager.addRental(newRecord);  // Save to database
+            DatabaseManager.addRental(newRecord);
         } catch (SQLException e) {
-            e.printStackTrace();  // Handle database error (you might want to show an error message)
+            e.printStackTrace();
         }
 
         // Clear input fields
         customerNameField.clear();
-        scooterIdField.clear();
-        rentalDurationField.clear();
-        paymentAmountField.clear();
+        atvIdField.clear();
+        startTimeField.clear();
+        endTimeField.clear();
+        statusField.clear();
+        totalCostField.clear();
     }
 }

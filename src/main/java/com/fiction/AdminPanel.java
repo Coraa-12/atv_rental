@@ -13,7 +13,7 @@ public class AdminPanel extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Scooter Rental Admin Panel");
+        primaryStage.setTitle("ATV Rental Admin Panel");
 
         // Layouts
         BorderPane mainLayout = new BorderPane();
@@ -23,8 +23,8 @@ public class AdminPanel extends Application {
         rentalForm.setPadding(new Insets(10));
         TextField customerNameField = new TextField();
         customerNameField.setPromptText("Customer Name");
-        TextField scooterIdField = new TextField();
-        scooterIdField.setPromptText("Scooter ID");
+        TextField atvIdField = new TextField();  // Changed from scooterId to atvId
+        atvIdField.setPromptText("ATV ID");
         TextField rentalDurationField = new TextField();
         rentalDurationField.setPromptText("Rental Duration (hours)");
         TextField paymentAmountField = new TextField();
@@ -33,7 +33,7 @@ public class AdminPanel extends Application {
         rentalForm.getChildren().addAll(
             new Label("New Rental"),
             customerNameField,
-            scooterIdField,
+            atvIdField,
             rentalDurationField,
             paymentAmountField,
             submitButton
@@ -43,19 +43,19 @@ public class AdminPanel extends Application {
         TableView<RentalRecord> rentalTable = new TableView<>();
         TableColumn<RentalRecord, String> rentalIdCol = new TableColumn<>("Rental ID");
         TableColumn<RentalRecord, String> customerNameCol = new TableColumn<>("Customer Name");
-        TableColumn<RentalRecord, String> scooterIdCol = new TableColumn<>("Scooter ID");
+        TableColumn<RentalRecord, String> atvIdCol = new TableColumn<>("ATV ID");
         TableColumn<RentalRecord, String> startTimeCol = new TableColumn<>("Start Time");
         TableColumn<RentalRecord, String> endTimeCol = new TableColumn<>("End Time");
         TableColumn<RentalRecord, String> statusCol = new TableColumn<>("Status");
         TableColumn<RentalRecord, String> totalCostCol = new TableColumn<>("Total Cost");
         rentalTable.getColumns().addAll(
-            rentalIdCol, customerNameCol, scooterIdCol, startTimeCol, endTimeCol, statusCol, totalCostCol
+            rentalIdCol, customerNameCol, atvIdCol, startTimeCol, endTimeCol, statusCol, totalCostCol
         );
 
         // Bind columns
         rentalIdCol.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
         customerNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        scooterIdCol.setCellValueFactory(new PropertyValueFactory<>("scooterId"));
+        atvIdCol.setCellValueFactory(new PropertyValueFactory<>("atvId")); 
         startTimeCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -63,16 +63,16 @@ public class AdminPanel extends Application {
 
         // Add event handling for the submit button
         submitButton.setOnAction(e -> {
-            String rentalId = "R" + System.currentTimeMillis(); // Generate a unique rental ID
+            String rentalId = "R" + System.currentTimeMillis();
             String customerName = customerNameField.getText();
-            String scooterId = scooterIdField.getText();
+            String atvId = atvIdField.getText(); 
             String rentalDuration = rentalDurationField.getText();
             Double paymentAmount = Double.parseDouble(paymentAmountField.getText());
             String startTime = java.time.LocalDateTime.now().toString(); // Current time as start time
             String endTime = java.time.LocalDateTime.now().plusHours(Long.parseLong(rentalDuration)).toString(); // Calculate end time
             String status = "Active"; // Default status
 
-            RentalRecord newRecord = new RentalRecord(rentalId, customerName, scooterId, startTime, endTime, status, paymentAmount);
+            RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, paymentAmount);  // Updated to ATV ID
             rentalTable.getItems().add(newRecord);
 
             // Save the record to the database
@@ -85,7 +85,7 @@ public class AdminPanel extends Application {
 
             // Clear the form
             customerNameField.clear();
-            scooterIdField.clear();
+            atvIdField.clear();  // Updated to ATV ID
             rentalDurationField.clear();
             paymentAmountField.clear();
         });
