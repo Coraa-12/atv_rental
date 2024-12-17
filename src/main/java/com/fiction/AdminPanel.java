@@ -26,7 +26,7 @@ public class AdminPanel extends Application {
         rentalForm.setPadding(new Insets(10));
         TextField customerNameField = new TextField();
         customerNameField.setPromptText("Customer Name");
-        TextField atvIdField = new TextField();  // Changed from scooterId to atvId
+        TextField atvIdField = new TextField();  
         atvIdField.setPromptText("ATV ID");
         TextField rentalDurationField = new TextField();
         rentalDurationField.setPromptText("Rental Duration (hours)");
@@ -36,7 +36,7 @@ public class AdminPanel extends Application {
         rentalForm.getChildren().addAll(
             new Label("New Rental"),
             customerNameField,
-            atvIdField,  // Updated to ATV ID
+            atvIdField, 
             rentalDurationField,
             paymentAmountField,
             submitButton
@@ -46,7 +46,7 @@ public class AdminPanel extends Application {
         TableView<RentalRecord> rentalTable = new TableView<>();
         TableColumn<RentalRecord, String> rentalIdCol = new TableColumn<>("Rental ID");
         TableColumn<RentalRecord, String> customerNameCol = new TableColumn<>("Customer Name");
-        TableColumn<RentalRecord, String> atvIdCol = new TableColumn<>("ATV ID");  // Changed column name to ATV ID
+        TableColumn<RentalRecord, String> atvIdCol = new TableColumn<>("ATV ID"); 
         TableColumn<RentalRecord, String> startTimeCol = new TableColumn<>("Start Time");
         TableColumn<RentalRecord, String> endTimeCol = new TableColumn<>("End Time");
         TableColumn<RentalRecord, String> statusCol = new TableColumn<>("Status");
@@ -70,19 +70,19 @@ public class AdminPanel extends Application {
         submitButton.setOnAction(e -> {
             String rentalId = "R" + System.currentTimeMillis(); // Generate a unique rental ID
             String customerName = customerNameField.getText();
-            String atvId = atvIdField.getText();  // Updated to ATV ID
+            String atvId = atvIdField.getText();  
             String rentalDuration = rentalDurationField.getText();
             Double paymentAmount = Double.parseDouble(paymentAmountField.getText());
-            String startTime = java.time.LocalDateTime.now().toString(); // Current time as start time
-            String endTime = java.time.LocalDateTime.now().plusHours(Long.parseLong(rentalDuration)).toString(); // Calculate end time
-            String status = "Active"; // Default status
+            String startTime = java.time.LocalDateTime.now().toString(); 
+            String endTime = java.time.LocalDateTime.now().plusHours(Long.parseLong(rentalDuration)).toString(); 
+            String status = "Active";
 
-            RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, paymentAmount);  // Updated to ATV ID
+            RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, paymentAmount);  
             rentalTable.getItems().add(newRecord);
 
             // Save the record to the database
             try {
-                DatabaseManager.addRental(newRecord);  // Save to database
+                DatabaseManager.addRental(newRecord);
             } catch (SQLException ex) {
                 ex.printStackTrace();
                 showAlert("Database Error", "There was an error saving the rental.");
@@ -90,7 +90,7 @@ public class AdminPanel extends Application {
 
             // Clear the form
             customerNameField.clear();
-            atvIdField.clear();  // Updated to ATV ID
+            atvIdField.clear();
             rentalDurationField.clear();
             paymentAmountField.clear();
         });

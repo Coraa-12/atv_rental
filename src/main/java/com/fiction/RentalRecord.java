@@ -3,7 +3,7 @@ package com.fiction;
 public class RentalRecord {
     private String rentalId;
     private String customerName;
-    private String atvId; // Renamed from scooterId
+    private String atvId;
     private String startTime;
     private String endTime;
     private String status;
@@ -13,7 +13,7 @@ public class RentalRecord {
     public RentalRecord(String rentalId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost) {
         this.rentalId = rentalId;
         this.customerName = customerName;
-        this.atvId = atvId; // Updated field name
+        this.atvId = atvId; 
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = status;
@@ -29,7 +29,7 @@ public class RentalRecord {
         return customerName;
     }
 
-    public String getAtvId() { // Updated method name
+    public String getAtvId() { 
         return atvId;
     }
 

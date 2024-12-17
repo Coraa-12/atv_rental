@@ -76,7 +76,7 @@ public class AdminPanelController {
 
     @FXML
     private void handleSubmit() {
-        String rentalId = "R" + System.currentTimeMillis(); // Generate unique rental ID
+        String rentalId = "R" + System.currentTimeMillis();
         String customerName = customerNameField.getText();
         String atvId = atvIdField.getText();
         LocalDate startDate = startDatePicker.getValue();
