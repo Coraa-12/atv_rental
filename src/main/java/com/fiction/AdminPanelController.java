@@ -4,22 +4,24 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
+import java.util.List;
 
 public class AdminPanelController {
 
     @FXML
     private TextField customerNameField;
     @FXML
-    private TextField atvIdField;
+    private ComboBox<String> atvModelComboBox;
     @FXML
     private DatePicker startDatePicker;
     @FXML
+    private DatePicker endDatePicker;
+    @FXML
     private TextField rentalDurationField;
     @FXML
-    private TextField endTimeField;
+    private ComboBox<String> statusComboBox;
     @FXML
     private TextField totalCostField;
 
@@ -51,41 +53,26 @@ public class AdminPanelController {
         endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         totalCostCol.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
-    }
 
-    @FXML
-    private void handleCalculateEndTime() {
-        LocalDate startDate = startDatePicker.getValue();
-        String rentalDurationInput = rentalDurationField.getText();
+        statusComboBox.getItems().addAll("Complete", "Ongoing", "Cancelled");
 
-        if (startDate == null || rentalDurationInput.isEmpty()) {
-            showError("Please select a start date and enter the rental duration.");
-            return;
-        }
-
-        try {
-            int rentalDurationHours = Integer.parseInt(rentalDurationInput);
-            LocalDateTime startDateTime = startDate.atStartOfDay(); // Assuming start at 00:00
-            LocalDateTime endDateTime = startDateTime.plusHours(rentalDurationHours);
-
-            endTimeField.setText(endDateTime.format(DATE_TIME_FORMATTER));
-        } catch (NumberFormatException e) {
-            showError("Invalid rental duration. Please enter a valid number.");
-        }
+        loadATVModels();
+        loadRentalRecords();
     }
 
     @FXML
     private void handleSubmit() {
         String rentalId = "R" + System.currentTimeMillis();
         String customerName = customerNameField.getText();
-        String atvId = atvIdField.getText();
+        String atvModel = atvModelComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
+        LocalDate endDate = endDatePicker.getValue();
         String rentalDurationInput = rentalDurationField.getText();
-        String endTime = endTimeField.getText();
+        String status = statusComboBox.getValue();
         String totalCostInput = totalCostField.getText();
 
         // Validate input
-        if (customerName.isEmpty() || atvId.isEmpty() || startDate == null || rentalDurationInput.isEmpty() || endTime.isEmpty() || totalCostInput.isEmpty()) {
+        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty() || status == null || totalCostInput.isEmpty()) {
             showError("Please fill all fields.");
             return;
         }
@@ -101,7 +88,8 @@ public class AdminPanelController {
 
         // Create a new RentalRecord
         String startTime = startDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
-        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, "Active", totalCost);
+        String endTime = endDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
+        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvModel, startTime, endTime, status, totalCost);
 
         // Add the new record to the TableView
         rentalTable.getItems().add(newRecord);
@@ -109,6 +97,11 @@ public class AdminPanelController {
         // Save to database
         try {
             DatabaseManager.addRental(newRecord);
+            // Mark the ATV as unavailable
+            String atvId = atvModel.split(" - ")[0]; // Extract the ATV ID from the ComboBox value
+            DatabaseManager.updateATVAvailability(atvId, false);
+            // Refresh the ComboBox
+            loadATVModels();
         } catch (SQLException e) {
             e.printStackTrace();
             showError("Error saving to database.");
@@ -118,12 +111,38 @@ public class AdminPanelController {
         clearForm();
     }
 
+    private void loadATVModels() {
+        try {
+            List<ATV> atvModels = DatabaseManager.getAllATVModels();
+            atvModelComboBox.getItems().clear();
+            for (ATV atv : atvModels) {
+                if (atv.isAvailable()) {
+                    atvModelComboBox.getItems().add(atv.getAtvId() + " - " + atv.getModelName());
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error loading ATV models.");
+        }
+    }
+
+    private void loadRentalRecords() {
+        try {
+            List<RentalRecord> rentalRecords = DatabaseManager.getAllRentals();
+            rentalTable.getItems().setAll(rentalRecords);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error loading rental records from database.");
+        }
+    }
+
     private void clearForm() {
         customerNameField.clear();
-        atvIdField.clear();
+        atvModelComboBox.setValue(null);
         startDatePicker.setValue(null);
+        endDatePicker.setValue(null);
         rentalDurationField.clear();
-        endTimeField.clear();
+        statusComboBox.setValue(null);
         totalCostField.clear();
     }
 

@@ -1,15 +1,55 @@
 package com.fiction;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseManager {
     private static final String URL = "jdbc:mysql://localhost:3306/atv_rental";
-    private static final String USER = "root";
-    private static final String PASSWORD = "4yvzeL_VFocYMtnZX!QqYipzu";
+    private static final String USER = "Fiction";
+    private static final String PASSWORD = "s-7NEqsqaRRGpMYTzsVPumnV9";
+
+    public static List<RentalRecord> getAllRentals() throws SQLException {
+        List<RentalRecord> rentalRecords = new ArrayList<>();
+        String query = "SELECT * FROM rentals";
+
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String rentalId = rs.getString("rental_id");
+                String customerName = rs.getString("customer_name");
+                String atvId = rs.getString("atv_id");
+                String startTime = rs.getString("start_time");
+                String endTime = rs.getString("end_time");
+                String status = rs.getString("status");
+                double totalCost = rs.getDouble("total_cost");
+
+                RentalRecord record = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, totalCost);
+                rentalRecords.add(record);
+            }
+        }
+
+        return rentalRecords;
+    }
+
+    public static List<ATV> getAllATVModels() throws SQLException {
+        List<ATV> atvModels = new ArrayList<>();
+        String query = "SELECT atv_id, model_name, availability FROM ATVs";
+
+        try (Connection conn = getConnection();
+             PreparedStatement statement = conn.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                String atvId = resultSet.getString("atv_id");
+                String modelName = resultSet.getString("model_name");
+                boolean availability = resultSet.getBoolean("availability");
+                atvModels.add(new ATV(atvId, modelName, availability));
+            }
+        }
+
+        return atvModels;
+    }
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
@@ -24,6 +64,15 @@ public class DatabaseManager {
             stmt.setString(4, rental.getEndTime());
             stmt.setString(5, rental.getStatus());
             stmt.setBigDecimal(6, new BigDecimal(rental.getTotalCost()));
+            stmt.executeUpdate();
+        }
+    }
+
+    public static void updateATVAvailability(String atvId, boolean availability) throws SQLException {
+        String query = "UPDATE ATVs SET availability = ? WHERE atv_id = ?";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setBoolean(1, availability);
+            stmt.setString(2, atvId);
             stmt.executeUpdate();
         }
     }
