@@ -2,7 +2,11 @@ package com.fiction;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.Parent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
@@ -25,39 +29,12 @@ public class AdminPanelController {
     @FXML
     private TextField totalCostField;
 
-    @FXML
-    private TableView<RentalRecord> rentalTable;
-    @FXML
-    private TableColumn<RentalRecord, String> rentalIdCol;
-    @FXML
-    private TableColumn<RentalRecord, String> customerNameCol;
-    @FXML
-    private TableColumn<RentalRecord, String> atvIdCol;
-    @FXML
-    private TableColumn<RentalRecord, String> startTimeCol;
-    @FXML
-    private TableColumn<RentalRecord, String> endTimeCol;
-    @FXML
-    private TableColumn<RentalRecord, String> statusCol;
-    @FXML
-    private TableColumn<RentalRecord, String> totalCostCol;
-
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @FXML
     public void initialize() {
-        rentalIdCol.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
-        customerNameCol.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        atvIdCol.setCellValueFactory(new PropertyValueFactory<>("atvId"));
-        startTimeCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-        endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-        totalCostCol.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
-
         statusComboBox.getItems().addAll("Complete", "Ongoing", "Cancelled");
-
         loadATVModels();
-        loadRentalRecords();
     }
 
     @FXML
@@ -91,9 +68,6 @@ public class AdminPanelController {
         String endTime = endDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
         RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvModel, startTime, endTime, status, totalCost);
 
-        // Add the new record to the TableView
-        rentalTable.getItems().add(newRecord);
-
         // Save to database
         try {
             DatabaseManager.addRental(newRecord);
@@ -126,16 +100,6 @@ public class AdminPanelController {
         }
     }
 
-    private void loadRentalRecords() {
-        try {
-            List<RentalRecord> rentalRecords = DatabaseManager.getAllRentals();
-            rentalTable.getItems().setAll(rentalRecords);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showError("Error loading rental records from database.");
-        }
-    }
-
     private void clearForm() {
         customerNameField.clear();
         atvModelComboBox.setValue(null);
@@ -152,5 +116,17 @@ public class AdminPanelController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void switchToRentalRecords() {
+        try {
+            Parent rentalRecordsRoot = FXMLLoader.load(getClass().getResource("RentalRecords.fxml"));
+            Stage stage = (Stage) customerNameField.getScene().getWindow();
+            stage.setScene(new Scene(rentalRecordsRoot));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Error loading Rental Records view.");
+        }
     }
 }

@@ -2,55 +2,61 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.fiction.AdminPanelController">
-    <VBox spacing="20" layoutX="20" layoutY="20">
-        <!-- Title -->
+    <VBox spacing="20" alignment="CENTER" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0"
+          AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+        <!-- Navigation Button -->
+        <HBox alignment="TOP_RIGHT">
+            <Button text="View Rental Records" onAction="#switchToRentalRecords" style="-fx-pref-width: 150px;"/>
+        </HBox>
+
+        <!-- Rest of your existing code remains the same -->
         <Label text="Welcome to the ATV Rental Admin Panel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
         <!-- Form Grid -->
-        <GridPane hgap="10" vgap="10">
+        <GridPane hgap="10" vgap="10" alignment="CENTER">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
             <Label text="Customer Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <TextField fx:id="customerNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <TextField fx:id="customerNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                       style="-fx-pref-width: 200px;"/>
 
             <Label text="ATV Model:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="atvModelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <ComboBox fx:id="atvModelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                      style="-fx-pref-width: 200px;"/>
 
             <Label text="Start Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="startDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <DatePicker fx:id="startDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                        style="-fx-pref-width: 200px;"/>
 
             <Label text="End Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="endDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <DatePicker fx:id="endDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                        style="-fx-pref-width: 200px;"/>
 
             <Label text="Rental Duration (hours):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-            <TextField fx:id="rentalDurationField" GridPane.rowIndex="4" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <TextField fx:id="rentalDurationField" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                       style="-fx-pref-width: 200px;"/>
 
             <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="statusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <ComboBox fx:id="statusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1"
+                      style="-fx-pref-width: 200px;"/>
 
             <Label text="Total Cost:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-            <TextField fx:id="totalCostField" GridPane.rowIndex="6" GridPane.columnIndex="1" style="-fx-pref-width: 200px;"/>
+            <TextField fx:id="totalCostField" GridPane.rowIndex="6" GridPane.columnIndex="1"
+                       style="-fx-pref-width: 200px;"/>
         </GridPane>
 
         <!-- Submit Button -->
         <Button text="Submit Rental" onAction="#handleSubmit" style="-fx-pref-width: 150px;"/>
-
-        <!-- Table to display rental records -->
-        <TableView fx:id="rentalTable" prefWidth="700" prefHeight="300">
-            <TableColumn fx:id="rentalIdCol" text="Rental ID" prefWidth="100"/>
-            <TableColumn fx:id="customerNameCol" text="Customer Name" prefWidth="150"/>
-            <TableColumn fx:id="atvIdCol" text="ATV ID" prefWidth="100"/>
-            <TableColumn fx:id="startTimeCol" text="Start Time" prefWidth="150"/>
-            <TableColumn fx:id="endTimeCol" text="End Time" prefWidth="150"/>
-            <TableColumn fx:id="statusCol" text="Status" prefWidth="100"/>
-            <TableColumn fx:id="totalCostCol" text="Total Cost" prefWidth="100"/>
-        </TableView>
     </VBox>
 </AnchorPane>
