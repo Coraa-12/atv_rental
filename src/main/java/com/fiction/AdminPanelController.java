@@ -24,14 +24,21 @@ public class AdminPanelController {
     private DatePicker endDatePicker;
     @FXML
     private TextField rentalDurationField;
-    @FXML
-    private ComboBox<String> statusComboBox;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private static AdminPanelController instance;
+
+    public AdminPanelController() {
+        instance = this;
+    }
+
+    public static AdminPanelController getInstance() {
+        return instance;
+    }
+
     @FXML
     public void initialize() {
-        statusComboBox.getItems().addAll("Complete", "Ongoing", "Cancelled");
         loadATVModels();
     }
 
@@ -43,10 +50,10 @@ public class AdminPanelController {
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
         String rentalDurationInput = rentalDurationField.getText();
-        String status = statusComboBox.getValue();
+        String status = "Ongoing"; // Automatically set status to "Ongoing"
 
         // Validate input
-        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty() || status == null) {
+        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty()) {
             showError("Please fill all fields.");
             return;
         }
@@ -116,7 +123,6 @@ public class AdminPanelController {
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
         rentalDurationField.clear();
-        statusComboBox.setValue(null);
     }
 
     private void showError(String message) {
@@ -125,6 +131,10 @@ public class AdminPanelController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void refreshATVModels() {
+        loadATVModels();
     }
 
     @FXML

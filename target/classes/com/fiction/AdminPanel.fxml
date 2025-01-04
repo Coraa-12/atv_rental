@@ -46,10 +46,6 @@
             <Label text="Rental Duration (hours):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
             <TextField fx:id="rentalDurationField" GridPane.rowIndex="4" GridPane.columnIndex="1"
                        style="-fx-pref-width: 200px;"/>
-
-            <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="statusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1"
-                      style="-fx-pref-width: 200px;"/>
         </GridPane>
 
         <!-- Submit Button -->

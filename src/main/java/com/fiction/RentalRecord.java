@@ -11,9 +11,10 @@ public class RentalRecord {
 
     // Constructor
     public RentalRecord(String rentalId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost) {
+        System.out.println("Creating RentalRecord: " + rentalId + ", ATV ID: " + atvId);
         this.rentalId = rentalId;
         this.customerName = customerName;
-        this.atvId = atvId; 
+        this.atvId = atvId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = status;
@@ -29,7 +30,7 @@ public class RentalRecord {
         return customerName;
     }
 
-    public String getAtvId() { 
+    public String getAtvId() {
         return atvId;
     }
 
@@ -47,5 +48,10 @@ public class RentalRecord {
 
     public Double getTotalCost() {
         return totalCost;
+    }
+
+    // Setter for status
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

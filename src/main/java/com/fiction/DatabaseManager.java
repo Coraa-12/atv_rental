@@ -83,10 +83,41 @@ public class DatabaseManager {
     }
 
     public static void updateATVAvailability(String atvId, boolean availability) throws SQLException {
+        System.out.println("Executing query: UPDATE ATVs SET availability = " + availability + " WHERE atv_id = '" + atvId + "'");
         String query = "UPDATE ATVs SET availability = ? WHERE atv_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setBoolean(1, availability);
+            pstmt.setString(2, atvId);
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+            if (rowsAffected == 0) {
+                throw new SQLException("No rows updated. ATV ID '" + atvId + "' might not exist.");
+            }
+        }
+    }
+
+
+
+    public static List<String> getAvailableATVModels() throws SQLException {
+        String query = "SELECT atv_id, model_name FROM ATVs WHERE availability = 1";
+        List<String> atvModels = new ArrayList<>();
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String atvId = rs.getString("atv_id");
+                String modelName = rs.getString("model_name");
+                atvModels.add(atvId + " - " + modelName); // Concatenation here
+            }
+        }
+        return atvModels;
+    }
+
+
+    public static void updateRentalStatus(String rentalId, String status) throws SQLException {
+        String query = "UPDATE rentals SET status = ? WHERE rental_id = ?";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setBoolean(1, availability);
-            stmt.setString(2, atvId);
+            stmt.setString(1, status);
+            stmt.setString(2, rentalId);
             stmt.executeUpdate();
         }
     }

@@ -5,6 +5,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
+import javafx.scene.control.TableCell;
+import javafx.util.Callback;
 import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -31,6 +35,8 @@ public class RentalRecordsController {
     private TableColumn<RentalRecord, String> statusColumn;
     @FXML
     private TableColumn<RentalRecord, Double> totalCostColumn;
+    @FXML
+    private TableColumn<RentalRecord, Void> actionColumn;
 
     @FXML
     public void initialize() {
@@ -54,6 +60,9 @@ public class RentalRecordsController {
         // Set column resize policy
         rentalTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+        // Add action buttons
+        addButtonToTable();
+
         loadRentalRecords();
     }
 
@@ -66,6 +75,87 @@ public class RentalRecordsController {
             showError("Error loading rental records from database.");
         }
     }
+
+    private void addButtonToTable() {
+        Callback<TableColumn<RentalRecord, Void>, TableCell<RentalRecord, Void>> cellFactory = new Callback<>() {
+            @Override
+            public TableCell<RentalRecord, Void> call(final TableColumn<RentalRecord, Void> param) {
+                final TableCell<RentalRecord, Void> cell = new TableCell<>() {
+
+                    private final Button btnComplete = new Button("Complete");
+                    private final Button btnCancel = new Button("Cancel");
+
+                    {
+                        btnComplete.setOnAction((event) -> {
+                            RentalRecord data = getTableView().getItems().get(getIndex());
+                            System.out.println("Complete button clicked for ATV ID: " + data.getAtvId());
+                            updateStatus(data, "Complete");
+                        });
+                        btnCancel.setOnAction((event) -> {
+                            RentalRecord data = getTableView().getItems().get(getIndex());
+                            System.out.println("Cancel button clicked for ATV ID: " + data.getAtvId());
+                            updateStatus(data, "Cancelled");
+                        });
+                    }
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            RentalRecord data = getTableView().getItems().get(getIndex());
+                            HBox hBox = new HBox(btnComplete, btnCancel);
+                            hBox.setSpacing(10);
+                            setGraphic(hBox);
+                            if ("Complete".equals(data.getStatus())) {
+                                btnComplete.setDisable(true);
+                                btnCancel.setDisable(true);
+                            } else {
+                                btnComplete.setDisable(false);
+                                btnCancel.setDisable(false);
+                            }
+                        }
+                    }
+                };
+                return cell;
+            }
+        };
+
+        actionColumn.setCellFactory(cellFactory);
+    }
+
+
+    private void updateStatus(RentalRecord record, String status) {
+        try {
+            System.out.println("Updating status for Rental ID: " + record.getRentalId());
+            System.out.println("ATV ID: " + record.getAtvId() + ", New Status: " + status);
+
+            DatabaseManager.updateRentalStatus(record.getRentalId(), status);
+            record.setStatus(status);
+            if ("Complete".equals(status)) {
+                // Extract ATV ID
+                String atvId = extractAtvId(record.getAtvId());
+                System.out.println("Marking ATV as available: " + atvId);
+                DatabaseManager.updateATVAvailability(atvId, true);
+            }
+            rentalTable.refresh();
+            AdminPanelController.getInstance().refreshATVModels();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error updating rental status.");
+        }
+    }
+
+    // Utility method to extract ATV ID
+    private String extractAtvId(String fullAtvId) {
+        if (fullAtvId == null || !fullAtvId.contains(" - ")) {
+            return fullAtvId; // Return as-is if no delimiter
+        }
+        return fullAtvId.split(" - ")[0];
+    }
+
+
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
