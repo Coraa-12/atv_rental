@@ -26,8 +26,6 @@ public class AdminPanelController {
     private TextField rentalDurationField;
     @FXML
     private ComboBox<String> statusComboBox;
-    @FXML
-    private TextField totalCostField;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -46,22 +44,34 @@ public class AdminPanelController {
         LocalDate endDate = endDatePicker.getValue();
         String rentalDurationInput = rentalDurationField.getText();
         String status = statusComboBox.getValue();
-        String totalCostInput = totalCostField.getText();
 
         // Validate input
-        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty() || status == null || totalCostInput.isEmpty()) {
+        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty() || status == null) {
             showError("Please fill all fields.");
             return;
         }
 
-        // Parse total cost
-        double totalCost;
+        // Parse rental duration
+        int rentalDuration;
         try {
-            totalCost = Double.parseDouble(totalCostInput);
+            rentalDuration = Integer.parseInt(rentalDurationInput);
         } catch (NumberFormatException e) {
-            showError("Invalid total cost value.");
+            showError("Invalid rental duration value.");
             return;
         }
+
+        // Fetch rental rate
+        double rentalRate;
+        try {
+            rentalRate = DatabaseManager.getRentalRate(atvModel.split(" - ")[0]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error fetching rental rate.");
+            return;
+        }
+
+        // Calculate total cost
+        double totalCost = rentalDuration * rentalRate;
 
         // Create a new RentalRecord
         String startTime = startDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
@@ -107,7 +117,6 @@ public class AdminPanelController {
         endDatePicker.setValue(null);
         rentalDurationField.clear();
         statusComboBox.setValue(null);
-        totalCostField.clear();
     }
 
     private void showError(String message) {

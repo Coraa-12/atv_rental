@@ -51,6 +51,20 @@ public class DatabaseManager {
         return atvModels;
     }
 
+    public static double getRentalRate(String atvId) throws SQLException {
+        String query = "SELECT rental_rate FROM ATVs WHERE atv_id = ?";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, atvId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("rental_rate");
+                } else {
+                    throw new SQLException("ATV not found");
+                }
+            }
+        }
+    }
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }

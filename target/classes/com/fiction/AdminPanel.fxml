@@ -50,10 +50,6 @@
             <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
             <ComboBox fx:id="statusComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1"
                       style="-fx-pref-width: 200px;"/>
-
-            <Label text="Total Cost:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-            <TextField fx:id="totalCostField" GridPane.rowIndex="6" GridPane.columnIndex="1"
-                       style="-fx-pref-width: 200px;"/>
         </GridPane>
 
         <!-- Submit Button -->
