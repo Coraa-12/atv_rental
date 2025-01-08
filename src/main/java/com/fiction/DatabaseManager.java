@@ -8,7 +8,7 @@ import java.util.List;
 public class DatabaseManager {
     private static final String URL = "jdbc:mysql://localhost:3306/atv_rental";
     private static final String USER = "Fiction";
-    private static final String PASSWORD = "s-7NEqsqaRRGpMYTzsVPumnV9";
+    private static final String PASSWORD = "n7@-NtX2zJ4N@vZVkMPDAFZp@";
 
     public static List<RentalRecord> getAllRentals() throws SQLException {
         List<RentalRecord> rentalRecords = new ArrayList<>();
