@@ -10,6 +10,7 @@ public class DatabaseManager {
     private static final String USER = "Fiction";
     private static final String PASSWORD = "n7@-NtX2zJ4N@vZVkMPDAFZp@";
 
+    // src/main/java/com/fiction/DatabaseManager.java
     public static List<RentalRecord> getAllRentals() throws SQLException {
         List<RentalRecord> rentalRecords = new ArrayList<>();
         String query = "SELECT * FROM rentals";
@@ -23,8 +24,9 @@ public class DatabaseManager {
                 String endTime = rs.getString("end_time");
                 String status = rs.getString("status");
                 double totalCost = rs.getDouble("total_cost");
+                int rentalDuration = rs.getInt("rental_duration"); // Fetch rental duration
 
-                RentalRecord record = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, totalCost);
+                RentalRecord record = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
                 rentalRecords.add(record);
             }
         }
@@ -69,8 +71,9 @@ public class DatabaseManager {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
+    // src/main/java/com/fiction/DatabaseManager.java
     public static void addRental(RentalRecord rental) throws SQLException {
-        String query = "INSERT INTO rentals (customer_name, atv_id, start_time, end_time, status, total_cost) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO rentals (customer_name, atv_id, start_time, end_time, status, total_cost, rental_duration) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, rental.getCustomerName());
             stmt.setString(2, rental.getAtvId());
@@ -78,6 +81,7 @@ public class DatabaseManager {
             stmt.setString(4, rental.getEndTime());
             stmt.setString(5, rental.getStatus());
             stmt.setBigDecimal(6, new BigDecimal(rental.getTotalCost()));
+            stmt.setInt(7, rental.getRentalDuration()); // Set rental duration
             stmt.executeUpdate();
         }
     }

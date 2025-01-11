@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.util.List;
@@ -80,10 +81,13 @@ public class AdminPanelController {
         // Calculate total cost
         double totalCost = rentalDuration * rentalRate;
 
+        // Use current local machine time for start time
+        LocalDateTime startDateTime = LocalDateTime.now();
+        String startTimeFormatted = startDateTime.format(DATE_TIME_FORMATTER);
+        String endTime = startDateTime.plusHours(rentalDuration).format(DATE_TIME_FORMATTER); // Calculate end time based on duration
+
         // Create a new RentalRecord
-        String startTime = startDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
-        String endTime = endDate.atStartOfDay().format(DATE_TIME_FORMATTER); // Default to start of the selected day
-        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvModel, startTime, endTime, status, totalCost);
+        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvModel, startTimeFormatted, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
 
         // Save to database
         try {

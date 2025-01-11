@@ -6,11 +6,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class AdminPanelApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("AdminPanel.fxml"));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("AdminPanel.fxml")));
         primaryStage.setTitle("ATV Rental Admin Panel");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();

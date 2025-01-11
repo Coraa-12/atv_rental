@@ -8,9 +8,10 @@ public class RentalRecord {
     private String endTime;
     private String status;
     private Double totalCost;
+    private int rentalDuration; // Add this field
 
     // Constructor
-    public RentalRecord(String rentalId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost) {
+    public RentalRecord(String rentalId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost, int rentalDuration) {
         System.out.println("Creating RentalRecord: " + rentalId + ", ATV ID: " + atvId);
         this.rentalId = rentalId;
         this.customerName = customerName;
@@ -19,6 +20,7 @@ public class RentalRecord {
         this.endTime = endTime;
         this.status = status;
         this.totalCost = totalCost;
+        this.rentalDuration = rentalDuration; // Initialize this field
     }
 
     // Getters
@@ -48,6 +50,10 @@ public class RentalRecord {
 
     public Double getTotalCost() {
         return totalCost;
+    }
+
+    public int getRentalDuration() {
+        return rentalDuration; // Add this getter
     }
 
     // Setter for status

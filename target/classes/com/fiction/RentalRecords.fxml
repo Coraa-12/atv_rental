@@ -22,6 +22,7 @@
                 <TableColumn fx:id="atvIdColumn" text="ATV ID" />
                 <TableColumn fx:id="startTimeColumn" text="Start Time" />
                 <TableColumn fx:id="endTimeColumn" text="End Time" />
+                <TableColumn fx:id="rentalDurationColumn" text="Rental Duration" />
                 <TableColumn fx:id="statusColumn" text="Status" />
                 <TableColumn fx:id="totalCostColumn" text="Total Cost" />
                 <TableColumn fx:id="actionColumn" text="Actions" />

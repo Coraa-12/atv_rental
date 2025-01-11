@@ -37,6 +37,8 @@ public class RentalRecordsController {
     private TableColumn<RentalRecord, Double> totalCostColumn;
     @FXML
     private TableColumn<RentalRecord, Void> actionColumn;
+    @FXML
+    private TableColumn<RentalRecord, Integer> rentalDurationColumn;
 
     @FXML
     public void initialize() {
@@ -47,6 +49,7 @@ public class RentalRecordsController {
         endTimeColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+        rentalDurationColumn.setCellValueFactory(new PropertyValueFactory<>("rentalDuration")); // Add this line
 
         // Set preferred width for columns
         rentalIdColumn.setPrefWidth(100);
@@ -56,6 +59,7 @@ public class RentalRecordsController {
         endTimeColumn.setPrefWidth(150);
         statusColumn.setPrefWidth(100);
         totalCostColumn.setPrefWidth(100);
+        rentalDurationColumn.setPrefWidth(100); // Add this line
 
         // Set column resize policy
         rentalTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
