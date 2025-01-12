@@ -10,28 +10,79 @@ public class DatabaseManager {
     private static final String USER = "Fiction";
     private static final String PASSWORD = "n7@-NtX2zJ4N@vZVkMPDAFZp@";
 
-    // src/main/java/com/fiction/DatabaseManager.java
+    public static List<Customer> getAllCustomers() throws SQLException {
+        List<Customer> customers = new ArrayList<>();
+        String query = "SELECT customer_id, name, email, phone_number FROM customers";
+
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query); ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("customer_id");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                String phone = rs.getString("phone_number");
+                customers.add(new Customer(id, name, email, phone));
+            }
+        }
+        return customers;
+    }
+
+    public static void deleteCustomer(int customerId) throws SQLException {
+        String query = "DELETE FROM customers WHERE customer_id = ?";
+
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, customerId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public static void saveCustomer(Customer customer) throws SQLException {
+        String query = "INSERT INTO customers (name, email, phone_number) VALUES (?, ?, ?)";
+
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, customer.getCustomerName());
+            pstmt.setString(2, customer.getCustomerEmail());
+            pstmt.setString(3, customer.getCustomerPhone());
+            pstmt.executeUpdate();
+        }
+    }
+
     public static List<RentalRecord> getAllRentals() throws SQLException {
         List<RentalRecord> rentalRecords = new ArrayList<>();
-        String query = "SELECT * FROM rentals";
+        String query = "SELECT r.rental_id, r.customer_id, c.name AS customer_name, r.atv_id, r.start_time, r.end_time, r.status, r.total_cost, r.rental_duration " +
+                "FROM rentals r " +
+                "JOIN customers c ON r.customer_id = c.customer_id";
 
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String rentalId = rs.getString("rental_id");
-                String customerName = rs.getString("customer_name");
+                int customerId = rs.getInt("customer_id");
+                String customerName = rs.getString("customer_name"); // Fetch customer name
                 String atvId = rs.getString("atv_id");
                 String startTime = rs.getString("start_time");
                 String endTime = rs.getString("end_time");
                 String status = rs.getString("status");
                 double totalCost = rs.getDouble("total_cost");
-                int rentalDuration = rs.getInt("rental_duration"); // Fetch rental duration
+                int rentalDuration = rs.getInt("rental_duration");
 
-                RentalRecord record = new RentalRecord(rentalId, customerName, atvId, startTime, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
+                RentalRecord record = new RentalRecord(rentalId, customerId, customerName, atvId, startTime, endTime, status, totalCost, rentalDuration);
                 rentalRecords.add(record);
             }
         }
-
         return rentalRecords;
+    }
+
+    public static void addRental(RentalRecord rental) throws SQLException {
+        String query = "INSERT INTO rentals (customer_id, atv_id, start_time, end_time, status, total_cost, rental_duration) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, rental.getCustomerId()); // Change from getCustomerName to getCustomerId
+            stmt.setString(2, rental.getAtvId());
+            stmt.setString(3, rental.getStartTime());
+            stmt.setString(4, rental.getEndTime());
+            stmt.setString(5, rental.getStatus());
+            stmt.setBigDecimal(6, new BigDecimal(rental.getTotalCost()));
+            stmt.setInt(7, rental.getRentalDuration());
+            stmt.executeUpdate();
+        }
     }
 
     public static List<ATV> getAllATVModels() throws SQLException {
@@ -71,21 +122,6 @@ public class DatabaseManager {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    // src/main/java/com/fiction/DatabaseManager.java
-    public static void addRental(RentalRecord rental) throws SQLException {
-        String query = "INSERT INTO rentals (customer_name, atv_id, start_time, end_time, status, total_cost, rental_duration) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, rental.getCustomerName());
-            stmt.setString(2, rental.getAtvId());
-            stmt.setString(3, rental.getStartTime());
-            stmt.setString(4, rental.getEndTime());
-            stmt.setString(5, rental.getStatus());
-            stmt.setBigDecimal(6, new BigDecimal(rental.getTotalCost()));
-            stmt.setInt(7, rental.getRentalDuration()); // Set rental duration
-            stmt.executeUpdate();
-        }
-    }
-
     public static void updateATVAvailability(String atvId, boolean availability) throws SQLException {
         System.out.println("Executing query: UPDATE ATVs SET availability = " + availability + " WHERE atv_id = '" + atvId + "'");
         String query = "UPDATE ATVs SET availability = ? WHERE atv_id = ?";
@@ -101,8 +137,6 @@ public class DatabaseManager {
         }
     }
 
-
-
     public static List<String> getAvailableATVModels() throws SQLException {
         String query = "SELECT atv_id, model_name FROM ATVs WHERE availability = 1";
         List<String> atvModels = new ArrayList<>();
@@ -110,12 +144,11 @@ public class DatabaseManager {
             while (rs.next()) {
                 String atvId = rs.getString("atv_id");
                 String modelName = rs.getString("model_name");
-                atvModels.add(atvId + " - " + modelName); // Concatenation here
+                atvModels.add(atvId + " - " + modelName);
             }
         }
         return atvModels;
     }
-
 
     public static void updateRentalStatus(String rentalId, String status) throws SQLException {
         String query = "UPDATE rentals SET status = ? WHERE rental_id = ?";

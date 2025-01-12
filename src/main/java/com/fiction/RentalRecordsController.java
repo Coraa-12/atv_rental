@@ -24,7 +24,9 @@ public class RentalRecordsController {
     @FXML
     private TableColumn<RentalRecord, String> rentalIdColumn;
     @FXML
-    private TableColumn<RentalRecord, String> customerNameColumn;
+    private TableColumn<RentalRecord, Integer> customerIdColumn;
+    @FXML
+    private TableColumn<RentalRecord, String> customerNameColumn; // New column for customer name
     @FXML
     private TableColumn<RentalRecord, String> atvIdColumn;
     @FXML
@@ -43,23 +45,25 @@ public class RentalRecordsController {
     @FXML
     public void initialize() {
         rentalIdColumn.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
-        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        customerIdColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
+        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName")); // Set cell value factory for customer name
         atvIdColumn.setCellValueFactory(new PropertyValueFactory<>("atvId"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endTimeColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
-        rentalDurationColumn.setCellValueFactory(new PropertyValueFactory<>("rentalDuration")); // Add this line
+        rentalDurationColumn.setCellValueFactory(new PropertyValueFactory<>("rentalDuration"));
 
         // Set preferred width for columns
         rentalIdColumn.setPrefWidth(100);
-        customerNameColumn.setPrefWidth(150);
+        customerIdColumn.setPrefWidth(100);
+        customerNameColumn.setPrefWidth(150); // Set preferred width for customer name
         atvIdColumn.setPrefWidth(100);
         startTimeColumn.setPrefWidth(150);
         endTimeColumn.setPrefWidth(150);
         statusColumn.setPrefWidth(100);
         totalCostColumn.setPrefWidth(100);
-        rentalDurationColumn.setPrefWidth(100); // Add this line
+        rentalDurationColumn.setPrefWidth(100);
 
         // Set column resize policy
         rentalTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -129,7 +133,6 @@ public class RentalRecordsController {
         actionColumn.setCellFactory(cellFactory);
     }
 
-
     private void updateStatus(RentalRecord record, String status) {
         try {
             System.out.println("Updating status for Rental ID: " + record.getRentalId());
@@ -158,8 +161,6 @@ public class RentalRecordsController {
         }
         return fullAtvId.split(" - ")[0];
     }
-
-
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

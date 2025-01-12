@@ -16,7 +16,7 @@ import java.util.List;
 public class AdminPanelController {
 
     @FXML
-    private TextField customerNameField;
+    private ComboBox<String> customerIdComboBox; // Change from TextField to ComboBox
     @FXML
     private ComboBox<String> atvModelComboBox;
     @FXML
@@ -40,13 +40,14 @@ public class AdminPanelController {
 
     @FXML
     public void initialize() {
+        loadCustomerIds();
         loadATVModels();
     }
 
     @FXML
     private void handleSubmit() {
         String rentalId = "R" + System.currentTimeMillis();
-        String customerName = customerNameField.getText();
+        String customerId = customerIdComboBox.getValue(); // Get selected customer ID
         String atvModel = atvModelComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
@@ -54,7 +55,7 @@ public class AdminPanelController {
         String status = "Ongoing"; // Automatically set status to "Ongoing"
 
         // Validate input
-        if (customerName.isEmpty() || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty()) {
+        if (customerId == null || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty()) {
             showError("Please fill all fields.");
             return;
         }
@@ -87,7 +88,7 @@ public class AdminPanelController {
         String endTime = startDateTime.plusHours(rentalDuration).format(DATE_TIME_FORMATTER); // Calculate end time based on duration
 
         // Create a new RentalRecord
-        RentalRecord newRecord = new RentalRecord(rentalId, customerName, atvModel, startTimeFormatted, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
+        RentalRecord newRecord = new RentalRecord(rentalId, Integer.parseInt(customerId), atvModel, startTimeFormatted, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
 
         // Save to database
         try {
@@ -106,6 +107,19 @@ public class AdminPanelController {
         clearForm();
     }
 
+    private void loadCustomerIds() {
+        try {
+            List<Customer> customers = DatabaseManager.getAllCustomers();
+            customerIdComboBox.getItems().clear();
+            for (Customer customer : customers) {
+                customerIdComboBox.getItems().add(String.valueOf(customer.getCustomerId()));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error loading customer IDs.");
+        }
+    }
+
     private void loadATVModels() {
         try {
             List<ATV> atvModels = DatabaseManager.getAllATVModels();
@@ -122,7 +136,7 @@ public class AdminPanelController {
     }
 
     private void clearForm() {
-        customerNameField.clear();
+        customerIdComboBox.setValue(null); // Change from customerNameField to customerIdComboBox
         atvModelComboBox.setValue(null);
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
@@ -145,11 +159,23 @@ public class AdminPanelController {
     private void switchToRentalRecords() {
         try {
             Parent rentalRecordsRoot = FXMLLoader.load(getClass().getResource("RentalRecords.fxml"));
-            Stage stage = (Stage) customerNameField.getScene().getWindow();
+            Stage stage = (Stage) customerIdComboBox.getScene().getWindow(); // Change from customerNameField to customerIdComboBox
             stage.setScene(new Scene(rentalRecordsRoot));
         } catch (IOException e) {
             e.printStackTrace();
             showError("Error loading Rental Records view.");
+        }
+    }
+
+    @FXML
+    private void switchToCustomerData() {
+        try {
+            Parent customerDataRoot = FXMLLoader.load(getClass().getResource("CustomerData.fxml"));
+            Stage stage = (Stage) AdminPanelApp.getPrimaryStage().getScene().getWindow();
+            stage.setScene(new Scene(customerDataRoot));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Error loading Customer Data view.");
         }
     }
 }

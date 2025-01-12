@@ -18,6 +18,7 @@
         <TableView fx:id="rentalTable">
             <columns>
                 <TableColumn fx:id="rentalIdColumn" text="Rental ID" />
+                <TableColumn fx:id="customerIdColumn" text="Customer ID" /> <!-- Change from customerNameColumn to customerIdColumn -->
                 <TableColumn fx:id="customerNameColumn" text="Customer Name" />
                 <TableColumn fx:id="atvIdColumn" text="ATV ID" />
                 <TableColumn fx:id="startTimeColumn" text="Start Time" />

@@ -18,8 +18,8 @@
         <Label text="Admin Panel - ATV Rentals" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
         <VBox spacing="10" alignment="CENTER_LEFT" maxWidth="400">
-            <Label text="Customer Name:"/>
-            <TextField fx:id="customerNameField" maxWidth="400"/>
+            <Label text="Customer ID:"/> <!-- Change from Customer Name to Customer ID -->
+            <ComboBox fx:id="customerIdComboBox" maxWidth="400"/> <!-- Change from customerNameField to customerIdField -->
 
             <Label text="ATV Model:"/>
             <ComboBox fx:id="atvModelComboBox" maxWidth="400"/>
@@ -37,6 +37,7 @@
         <VBox spacing="10" alignment="CENTER" maxWidth="400">
             <Button text="Submit Rental" onAction="#handleSubmit" prefWidth="120"/>
             <Button text="View Rental Records" onAction="#switchToRentalRecords" prefWidth="150"/>
+            <Button text="Manage Customer Data" onAction="#switchToCustomerData" />
         </VBox>
     </VBox>
 </AnchorPane>
