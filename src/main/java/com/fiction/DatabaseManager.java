@@ -70,7 +70,7 @@ public class DatabaseManager {
                 double totalCost = rs.getDouble("total_cost");
                 int rentalDuration = rs.getInt("rental_duration");
 
-                // Combine atvId and modelName
+                // COMBINE ATV_ID AND MODEL_NAME
                 String fullAtvInfo = atvId + " - " + modelName;
 
                 RentalRecord record = new RentalRecord(rentalId, customerId, customerName,
@@ -91,7 +91,7 @@ public class DatabaseManager {
             stmt.setString(4, rental.getEndTime());
             stmt.setString(5, rental.getStatus());
 
-            // Add null check for totalCost
+            // CHECK IF NULL
             Double totalCost = rental.getTotalCost();
             if (totalCost != null) {
                 stmt.setBigDecimal(6, new BigDecimal(totalCost));

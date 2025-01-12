@@ -11,7 +11,7 @@ public class RentalRecord {
     private Double totalCost;
     private int rentalDuration;
 
-    // First constructor
+    // CONSTRUCTOR
     public RentalRecord(String rentalId, Integer customerId, String customerName, String atvId,
                         String startTime, String endTime, String status, Double totalCost,
                         Integer rentalDuration) {

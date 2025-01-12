@@ -47,17 +47,16 @@ public class AdminPanelController {
 
     @FXML
     private void handleSubmit() {
-        // Check if admin is logged in
+        // CHECK IF LOGIN
         if (!AdminSession.getInstance().isLoggedIn()) {
-            // Show login dialog
+            // SHOW LOGIN DIALOG
             AdminLoginDialog loginDialog = new AdminLoginDialog();
             loginDialog.showAndWait().ifPresent(credentials -> {
                 try {
                     if (DatabaseManager.verifyAdminCredentials(credentials.getKey(), credentials.getValue())) {
-                        // Login successful
+                        // LOGIN SUCCESFULL
                         AdminSession.getInstance().login(credentials.getKey());
                         DatabaseManager.updateLastLogin(credentials.getKey());
-                        // Proceed with insertion
                         processRentalInsertion();
                     } else {
                         showError("Invalid credentials!");
@@ -67,7 +66,7 @@ public class AdminPanelController {
                 }
             });
         } else {
-            // Already logged in, proceed with insertion
+            // IF ALREADY LOGGED IN
             processRentalInsertion();
         }
     }
@@ -81,13 +80,12 @@ public class AdminPanelController {
         String rentalDurationInput = rentalDurationField.getText();
         String status = "Ongoing";
 
-        // Validate input
+        // VALIDASI INPUT
         if (customerId == null || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty()) {
             showError("Please fill all fields.");
             return;
         }
 
-        // Parse rental duration
         int rentalDuration;
         try {
             rentalDuration = Integer.parseInt(rentalDurationInput);
@@ -96,7 +94,7 @@ public class AdminPanelController {
             return;
         }
 
-        // Fetch rental rate
+        // FETCH RENTAL RATE FROM ATVs TABLE
         double rentalRate;
         try {
             rentalRate = DatabaseManager.getRentalRate(atvModel.split(" - ")[0]);
@@ -106,15 +104,15 @@ public class AdminPanelController {
             return;
         }
 
-        // Calculate total cost
+        // CALCULATE TOTAL COST BASED ON RENTAL DURATION AND RENTAL RATE
         double totalCost = rentalDuration * rentalRate;
 
-        // Use current local machine time for start time
+        // BASED ON LOCAL MACHINE TIME
         LocalDateTime startDateTime = LocalDateTime.now();
         String startTimeFormatted = startDateTime.format(DATE_TIME_FORMATTER);
         String endTime = startDateTime.plusHours(rentalDuration).format(DATE_TIME_FORMATTER);
 
-        // Create a new RentalRecord
+        // CREATE NEW RENTAL RECORD
         RentalRecord newRecord = new RentalRecord(
                 rentalId,
                 Integer.parseInt(customerId),
@@ -127,13 +125,13 @@ public class AdminPanelController {
                 rentalDuration
         );
 
-        // Save to database
+        // FINALLY SAVE TO DATABASE
         try {
             DatabaseManager.addRental(newRecord);
-            // Mark the ATV as unavailable
+            // CHANGE THE ATV STATUS TO UNAVAILABLE
             String atvId = atvModel.split(" - ")[0];
             DatabaseManager.updateATVAvailability(atvId, false);
-            // Refresh the ComboBox
+            // REFRESH COMBOBOX
             loadATVModels();
             showInfo("Rental successfully added!");
             clearForm();
@@ -216,12 +214,6 @@ public class AdminPanelController {
     }
 
     private void showAdminPanel() {
-    }
-
-    @FXML
-    private void handleLogout() {
-        AdminSession.getInstance().logout();
-        showInfo("Successfully logged out.");
     }
 
     public void refreshATVModels() {

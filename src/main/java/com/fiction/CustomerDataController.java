@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.util.Callback;
 import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -31,7 +30,7 @@ public class CustomerDataController {
     private TableColumn<Customer, Void> actionColumn;
 
     @FXML
-    private TextField searchField; // Add this line
+    private TextField searchField;
     @FXML
     private TextField customerNameField;
     @FXML
@@ -46,20 +45,17 @@ public class CustomerDataController {
         customerEmailColumn.setCellValueFactory(new PropertyValueFactory<>("customerEmail"));
         customerPhoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
 
-        // Add custom styling to the table
         customerTable.getStyleClass().add("custom-table");
 
-        // Set preferred width for columns
         customerIdColumn.setStyle("-fx-alignment: CENTER;");
         customerNameColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         customerEmailColumn.setStyle("-fx-alignment: CENTER-LEFT;");
         customerPhoneColumn.setStyle("-fx-alignment: CENTER;");
         actionColumn.setStyle("-fx-alignment: CENTER;");
 
-        // Set column resize policy
         customerTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Add action buttons
+        // ACTION BUTTONS
         addButtonToTable();
 
         loadCustomerData();
@@ -82,7 +78,6 @@ public class CustomerDataController {
             private final HBox buttonBox = new HBox(5, editButton, deleteButton);
 
             {
-                // Style the edit button
                 editButton.setStyle(
                         "-fx-background-color: #4CAF50; " +
                                 "-fx-text-fill: white; " +
@@ -93,10 +88,7 @@ public class CustomerDataController {
                 editButton.setOnAction(event -> {
                     Customer data = getTableView().getItems().get(getIndex());
                     System.out.println("Edit button clicked for Customer ID: " + data.getCustomerId());
-                    // Implement edit functionality
                 });
-
-                // Style the delete button
                 deleteButton.setStyle(
                         "-fx-background-color: #f44336; " +
                                 "-fx-text-fill: white; " +
@@ -109,8 +101,6 @@ public class CustomerDataController {
                     System.out.println("Delete button clicked for Customer ID: " + data.getCustomerId());
                     deleteCustomer(data);
                 });
-
-                // Center the buttons in the cell
                 buttonBox.setAlignment(Pos.CENTER);
             }
 
@@ -151,8 +141,8 @@ public class CustomerDataController {
         try {
             DatabaseManager.saveCustomer(customer);
             showSuccess("Customer data saved successfully.");
-            loadCustomerData(); // Refresh the table after adding a new customer
-            clearForm(); // Clear the form fields
+            loadCustomerData();
+            clearForm();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error saving customer data.");
@@ -165,7 +155,6 @@ public class CustomerDataController {
         alert.setHeaderText(null);
         alert.setContentText(message);
 
-        // Style the alert dialog
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setStyle(
                 "-fx-background-color: white; " +
@@ -181,7 +170,6 @@ public class CustomerDataController {
         alert.setHeaderText(null);
         alert.setContentText(message);
 
-        // Style the alert dialog
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setStyle(
                 "-fx-background-color: white; " +
@@ -207,7 +195,6 @@ public class CustomerDataController {
                     .collect(Collectors.toList());
             customerTable.getItems().setAll(filteredCustomers);
 
-            // Log the search action
             System.out.println("Search performed with text: " + searchText);
         } catch (SQLException e) {
             e.printStackTrace();

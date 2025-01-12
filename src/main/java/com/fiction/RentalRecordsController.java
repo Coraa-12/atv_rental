@@ -42,7 +42,6 @@ public class RentalRecordsController {
 
     @FXML
     public void initialize() {
-        // Set up the column mappings using the exact property names from RentalRecord
         rentalIdColumn.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
         customerIdColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
@@ -75,7 +74,7 @@ public class RentalRecordsController {
                     setGraphic(null);
                 } else {
                     RentalRecord rental = getTableView().getItems().get(getIndex());
-                    // Only show button for "Ongoing" rentals
+                    // ACTION BUTTON ONLY SHOW FOR "ONGOING" RENTALS
                     setGraphic("Ongoing".equals(rental.getStatus()) ? button : null);
                 }
             }
