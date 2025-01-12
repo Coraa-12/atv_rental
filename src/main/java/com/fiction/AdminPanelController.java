@@ -12,11 +12,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.util.List;
+import javafx.util.Pair;
 
 public class AdminPanelController {
 
     @FXML
-    private ComboBox<String> customerIdComboBox; // Change from TextField to ComboBox
+    private ComboBox<String> customerIdComboBox;
     @FXML
     private ComboBox<String> atvModelComboBox;
     @FXML
@@ -46,13 +47,39 @@ public class AdminPanelController {
 
     @FXML
     private void handleSubmit() {
+        // Check if admin is logged in
+        if (!AdminSession.getInstance().isLoggedIn()) {
+            // Show login dialog
+            AdminLoginDialog loginDialog = new AdminLoginDialog();
+            loginDialog.showAndWait().ifPresent(credentials -> {
+                try {
+                    if (DatabaseManager.verifyAdminCredentials(credentials.getKey(), credentials.getValue())) {
+                        // Login successful
+                        AdminSession.getInstance().login(credentials.getKey());
+                        DatabaseManager.updateLastLogin(credentials.getKey());
+                        // Proceed with insertion
+                        processRentalInsertion();
+                    } else {
+                        showError("Invalid credentials!");
+                    }
+                } catch (SQLException e) {
+                    showError("Login error: " + e.getMessage());
+                }
+            });
+        } else {
+            // Already logged in, proceed with insertion
+            processRentalInsertion();
+        }
+    }
+
+    private void processRentalInsertion() {
         String rentalId = "R" + System.currentTimeMillis();
-        String customerId = customerIdComboBox.getValue(); // Get selected customer ID
+        String customerId = customerIdComboBox.getValue();
         String atvModel = atvModelComboBox.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
         String rentalDurationInput = rentalDurationField.getText();
-        String status = "Ongoing"; // Automatically set status to "Ongoing"
+        String status = "Ongoing";
 
         // Validate input
         if (customerId == null || atvModel == null || startDate == null || endDate == null || rentalDurationInput.isEmpty()) {
@@ -85,26 +112,35 @@ public class AdminPanelController {
         // Use current local machine time for start time
         LocalDateTime startDateTime = LocalDateTime.now();
         String startTimeFormatted = startDateTime.format(DATE_TIME_FORMATTER);
-        String endTime = startDateTime.plusHours(rentalDuration).format(DATE_TIME_FORMATTER); // Calculate end time based on duration
+        String endTime = startDateTime.plusHours(rentalDuration).format(DATE_TIME_FORMATTER);
 
         // Create a new RentalRecord
-        RentalRecord newRecord = new RentalRecord(rentalId, Integer.parseInt(customerId), atvModel, startTimeFormatted, endTime, status, totalCost, rentalDuration); // Pass rentalDuration
+        RentalRecord newRecord = new RentalRecord(
+                rentalId,
+                Integer.parseInt(customerId),
+                null,
+                atvModel.split(" - ")[0],
+                startTimeFormatted,
+                endTime,
+                status,
+                totalCost,
+                rentalDuration
+        );
 
         // Save to database
         try {
             DatabaseManager.addRental(newRecord);
             // Mark the ATV as unavailable
-            String atvId = atvModel.split(" - ")[0]; // Extract the ATV ID from the ComboBox value
+            String atvId = atvModel.split(" - ")[0];
             DatabaseManager.updateATVAvailability(atvId, false);
             // Refresh the ComboBox
             loadATVModels();
+            showInfo("Rental successfully added!");
+            clearForm();
         } catch (SQLException e) {
             e.printStackTrace();
             showError("Error saving to database.");
         }
-
-        // Clear input fields
-        clearForm();
     }
 
     private void loadCustomerIds() {
@@ -136,7 +172,7 @@ public class AdminPanelController {
     }
 
     private void clearForm() {
-        customerIdComboBox.setValue(null); // Change from customerNameField to customerIdComboBox
+        customerIdComboBox.setValue(null);
         atvModelComboBox.setValue(null);
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
@@ -151,6 +187,43 @@ public class AdminPanelController {
         alert.showAndWait();
     }
 
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showLoginDialog() {
+        AdminLoginDialog loginDialog = new AdminLoginDialog();
+        loginDialog.showAndWait().ifPresent(credentials -> {
+            String username = credentials.getKey();
+            String password = credentials.getValue();
+            try {
+                if (DatabaseManager.verifyAdminCredentials(username, password)) {
+                    AdminSession.getInstance().login(username);
+                    showAdminPanel();
+                } else {
+                    showError("Invalid credentials. Please try again.");
+                    showLoginDialog();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showError("Error verifying credentials.");
+            }
+        });
+    }
+
+    private void showAdminPanel() {
+    }
+
+    @FXML
+    private void handleLogout() {
+        AdminSession.getInstance().logout();
+        showInfo("Successfully logged out.");
+    }
+
     public void refreshATVModels() {
         loadATVModels();
     }
@@ -159,7 +232,7 @@ public class AdminPanelController {
     private void switchToRentalRecords() {
         try {
             Parent rentalRecordsRoot = FXMLLoader.load(getClass().getResource("RentalRecords.fxml"));
-            Stage stage = (Stage) customerIdComboBox.getScene().getWindow(); // Change from customerNameField to customerIdComboBox
+            Stage stage = (Stage) customerIdComboBox.getScene().getWindow();
             stage.setScene(new Scene(rentalRecordsRoot));
         } catch (IOException e) {
             e.printStackTrace();

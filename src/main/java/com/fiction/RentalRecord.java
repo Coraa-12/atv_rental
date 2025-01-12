@@ -11,9 +11,10 @@ public class RentalRecord {
     private Double totalCost;
     private int rentalDuration;
 
-    // Constructor
-    public RentalRecord(String rentalId, int customerId, String customerName, String atvId, String startTime, String endTime, String status, Double totalCost, int rentalDuration) {
-        System.out.println("Creating RentalRecord: " + rentalId + ", ATV ID: " + atvId);
+    // First constructor
+    public RentalRecord(String rentalId, Integer customerId, String customerName, String atvId,
+                        String startTime, String endTime, String status, Double totalCost,
+                        Integer rentalDuration) {
         this.rentalId = rentalId;
         this.customerId = customerId;
         this.customerName = customerName;
@@ -25,7 +26,11 @@ public class RentalRecord {
         this.rentalDuration = rentalDuration;
     }
 
-    public RentalRecord(String rentalId, int customerId, String atvModel, String startTimeFormatted, String endTime, String status, double totalCost, int rentalDuration) {
+    public void setTotalCost(Double totalCost) {
+        if (totalCost == null) {
+            throw new IllegalArgumentException("Total cost cannot be null");
+        }
+        this.totalCost = totalCost;
     }
 
     // Getters
@@ -72,5 +77,9 @@ public class RentalRecord {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public String getRawAtvId() {
+        return this.atvId.split(" - ")[0];
     }
 }

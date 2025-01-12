@@ -1,21 +1,17 @@
 package com.fiction;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.control.TableCell;
-import javafx.util.Callback;
-import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RentalRecordsController {
 
@@ -26,7 +22,7 @@ public class RentalRecordsController {
     @FXML
     private TableColumn<RentalRecord, Integer> customerIdColumn;
     @FXML
-    private TableColumn<RentalRecord, String> customerNameColumn; // New column for customer name
+    private TableColumn<RentalRecord, String> customerNameColumn;
     @FXML
     private TableColumn<RentalRecord, String> atvIdColumn;
     @FXML
@@ -38,15 +34,18 @@ public class RentalRecordsController {
     @FXML
     private TableColumn<RentalRecord, Double> totalCostColumn;
     @FXML
+    private TableColumn<RentalRecord, Integer> rentalDurationColumn;
+    @FXML
     private TableColumn<RentalRecord, Void> actionColumn;
     @FXML
-    private TableColumn<RentalRecord, Integer> rentalDurationColumn;
+    private TextField searchField;
 
     @FXML
     public void initialize() {
+        // Set up the column mappings using the exact property names from RentalRecord
         rentalIdColumn.setCellValueFactory(new PropertyValueFactory<>("rentalId"));
         customerIdColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
-        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName")); // Set cell value factory for customer name
+        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
         atvIdColumn.setCellValueFactory(new PropertyValueFactory<>("atvId"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
         endTimeColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
@@ -54,120 +53,76 @@ public class RentalRecordsController {
         totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
         rentalDurationColumn.setCellValueFactory(new PropertyValueFactory<>("rentalDuration"));
 
-        // Set preferred width for columns
-        rentalIdColumn.setPrefWidth(100);
-        customerIdColumn.setPrefWidth(100);
-        customerNameColumn.setPrefWidth(150); // Set preferred width for customer name
-        atvIdColumn.setPrefWidth(100);
-        startTimeColumn.setPrefWidth(150);
-        endTimeColumn.setPrefWidth(150);
-        statusColumn.setPrefWidth(100);
-        totalCostColumn.setPrefWidth(100);
-        rentalDurationColumn.setPrefWidth(100);
-
-        // Set column resize policy
-        rentalTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        // Add action buttons
-        addButtonToTable();
-
+        setupActionColumn();
         loadRentalRecords();
+    }
+
+    private void setupActionColumn() {
+        actionColumn.setCellFactory(column -> new TableCell<RentalRecord, Void>() {
+            private final Button button = new Button("Complete");
+            {
+                button.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+                button.setOnAction(event -> {
+                    RentalRecord rental = getTableView().getItems().get(getIndex());
+                    completeRental(rental);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    RentalRecord rental = getTableView().getItems().get(getIndex());
+                    // Only show button for "Ongoing" rentals
+                    setGraphic("Ongoing".equals(rental.getStatus()) ? button : null);
+                }
+            }
+        });
+    }
+
+    private void completeRental(RentalRecord rental) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Complete rental for ATV " + rental.getRawAtvId() + "?",
+                ButtonType.YES, ButtonType.NO);
+        confirm.setTitle("Complete Rental");
+        confirm.setHeaderText(null);
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                try {
+                    DatabaseManager.updateRentalStatus(rental.getRentalId(), "Completed");
+                    DatabaseManager.updateATVAvailability(rental.getRawAtvId(), true);
+                    loadRentalRecords(); // Refresh the table
+                } catch (SQLException e) {
+                    showError("Failed to complete rental: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void loadRentalRecords() {
         try {
-            List<RentalRecord> rentalRecords = DatabaseManager.getAllRentals();
-            rentalTable.getItems().setAll(rentalRecords);
+            List<RentalRecord> rentals = DatabaseManager.getAllRentals();
+            rentalTable.getItems().setAll(rentals);
         } catch (SQLException e) {
-            e.printStackTrace();
-            showError("Error loading rental records from database.");
+            showError("Error loading rental records: " + e.getMessage());
         }
     }
 
-    private void addButtonToTable() {
-        Callback<TableColumn<RentalRecord, Void>, TableCell<RentalRecord, Void>> cellFactory = new Callback<>() {
-            @Override
-            public TableCell<RentalRecord, Void> call(final TableColumn<RentalRecord, Void> param) {
-                final TableCell<RentalRecord, Void> cell = new TableCell<>() {
-
-                    private final Button btnComplete = new Button("Complete");
-                    private final Button btnCancel = new Button("Cancel");
-
-                    {
-                        btnComplete.setOnAction((event) -> {
-                            RentalRecord data = getTableView().getItems().get(getIndex());
-                            System.out.println("Complete button clicked for ATV ID: " + data.getAtvId());
-                            updateStatus(data, "Complete");
-                        });
-                        btnCancel.setOnAction((event) -> {
-                            RentalRecord data = getTableView().getItems().get(getIndex());
-                            System.out.println("Cancel button clicked for ATV ID: " + data.getAtvId());
-                            updateStatus(data, "Cancelled");
-                        });
-                    }
-
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            RentalRecord data = getTableView().getItems().get(getIndex());
-                            HBox hBox = new HBox(btnComplete, btnCancel);
-                            hBox.setSpacing(10);
-                            setGraphic(hBox);
-                            if ("Complete".equals(data.getStatus())) {
-                                btnComplete.setDisable(true);
-                                btnCancel.setDisable(true);
-                            } else {
-                                btnComplete.setDisable(false);
-                                btnCancel.setDisable(false);
-                            }
-                        }
-                    }
-                };
-                return cell;
-            }
-        };
-
-        actionColumn.setCellFactory(cellFactory);
-    }
-
-    private void updateStatus(RentalRecord record, String status) {
+    @FXML
+    private void handleSearch() {
+        String searchText = searchField.getText().toLowerCase().trim();
         try {
-            System.out.println("Updating status for Rental ID: " + record.getRentalId());
-            System.out.println("ATV ID: " + record.getAtvId() + ", New Status: " + status);
-
-            DatabaseManager.updateRentalStatus(record.getRentalId(), status);
-            record.setStatus(status);
-            if ("Complete".equals(status)) {
-                // Extract ATV ID
-                String atvId = extractAtvId(record.getAtvId());
-                System.out.println("Marking ATV as available: " + atvId);
-                DatabaseManager.updateATVAvailability(atvId, true);
-            }
-            rentalTable.refresh();
-            AdminPanelController.getInstance().refreshATVModels();
+            List<RentalRecord> allRecords = DatabaseManager.getAllRentals();
+            List<RentalRecord> filteredRecords = allRecords.stream()
+                    .filter(record -> record.getCustomerName().toLowerCase().contains(searchText))
+                    .collect(Collectors.toList());
+            rentalTable.getItems().setAll(filteredRecords);
         } catch (SQLException e) {
-            e.printStackTrace();
-            showError("Error updating rental status.");
+            showError("Error performing search: " + e.getMessage());
         }
-    }
-
-    // Utility method to extract ATV ID
-    private String extractAtvId(String fullAtvId) {
-        if (fullAtvId == null || !fullAtvId.contains(" - ")) {
-            return fullAtvId; // Return as-is if no delimiter
-        }
-        return fullAtvId.split(" - ")[0];
-    }
-
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     @FXML
@@ -177,8 +132,15 @@ public class RentalRecordsController {
             Stage stage = (Stage) rentalTable.getScene().getWindow();
             stage.setScene(new Scene(adminPanelRoot));
         } catch (IOException e) {
-            e.printStackTrace();
-            showError("Error loading Admin Panel view.");
+            showError("Error loading Admin Panel: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

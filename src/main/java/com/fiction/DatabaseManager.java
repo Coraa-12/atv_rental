@@ -48,23 +48,34 @@ public class DatabaseManager {
 
     public static List<RentalRecord> getAllRentals() throws SQLException {
         List<RentalRecord> rentalRecords = new ArrayList<>();
-        String query = "SELECT r.rental_id, r.customer_id, c.name AS customer_name, r.atv_id, r.start_time, r.end_time, r.status, r.total_cost, r.rental_duration " +
+        String query = "SELECT r.rental_id, r.customer_id, c.name AS customer_name, " +
+                "r.atv_id, a.model_name, r.start_time, r.end_time, " +
+                "r.status, r.total_cost, r.rental_duration " +
                 "FROM rentals r " +
-                "JOIN customers c ON r.customer_id = c.customer_id";
+                "JOIN customers c ON r.customer_id = c.customer_id " +
+                "JOIN ATVs a ON r.atv_id = a.atv_id";
 
-        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String rentalId = rs.getString("rental_id");
                 int customerId = rs.getInt("customer_id");
-                String customerName = rs.getString("customer_name"); // Fetch customer name
+                String customerName = rs.getString("customer_name");
                 String atvId = rs.getString("atv_id");
+                String modelName = rs.getString("model_name");
                 String startTime = rs.getString("start_time");
                 String endTime = rs.getString("end_time");
                 String status = rs.getString("status");
                 double totalCost = rs.getDouble("total_cost");
                 int rentalDuration = rs.getInt("rental_duration");
 
-                RentalRecord record = new RentalRecord(rentalId, customerId, customerName, atvId, startTime, endTime, status, totalCost, rentalDuration);
+                // Combine atvId and modelName
+                String fullAtvInfo = atvId + " - " + modelName;
+
+                RentalRecord record = new RentalRecord(rentalId, customerId, customerName,
+                        fullAtvInfo, startTime, endTime,
+                        status, totalCost, rentalDuration);
                 rentalRecords.add(record);
             }
         }
@@ -74,12 +85,20 @@ public class DatabaseManager {
     public static void addRental(RentalRecord rental) throws SQLException {
         String query = "INSERT INTO rentals (customer_id, atv_id, start_time, end_time, status, total_cost, rental_duration) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, rental.getCustomerId()); // Change from getCustomerName to getCustomerId
+            stmt.setInt(1, rental.getCustomerId());
             stmt.setString(2, rental.getAtvId());
             stmt.setString(3, rental.getStartTime());
             stmt.setString(4, rental.getEndTime());
             stmt.setString(5, rental.getStatus());
-            stmt.setBigDecimal(6, new BigDecimal(rental.getTotalCost()));
+
+            // Add null check for totalCost
+            Double totalCost = rental.getTotalCost();
+            if (totalCost != null) {
+                stmt.setBigDecimal(6, new BigDecimal(totalCost));
+            } else {
+                stmt.setNull(6, Types.DECIMAL);
+            }
+
             stmt.setInt(7, rental.getRentalDuration());
             stmt.executeUpdate();
         }
@@ -155,6 +174,44 @@ public class DatabaseManager {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, status);
             stmt.setString(2, rentalId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public static boolean verifyAdminCredentials(String username, String password) throws SQLException {
+        String query = "SELECT password FROM admin_users WHERE username = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedPassword = rs.getString("password");
+                    return storedPassword.equals(password);
+                }
+                return false;
+            }
+        }
+    }
+
+    public static String hashPassword(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-512");
+            byte[] bytes = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void updateLastLogin(String username) throws SQLException {
+        String query = "UPDATE admin_users SET last_login = NOW() WHERE username = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, username);
             stmt.executeUpdate();
         }
     }

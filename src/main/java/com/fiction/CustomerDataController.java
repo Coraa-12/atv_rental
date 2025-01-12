@@ -1,14 +1,9 @@
 package com.fiction;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.TableCell;
 import javafx.util.Callback;
 import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
@@ -17,6 +12,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
+import javafx.geometry.Pos;
 
 public class CustomerDataController {
 
@@ -34,6 +31,8 @@ public class CustomerDataController {
     private TableColumn<Customer, Void> actionColumn;
 
     @FXML
+    private TextField searchField; // Add this line
+    @FXML
     private TextField customerNameField;
     @FXML
     private TextField customerEmailField;
@@ -47,11 +46,15 @@ public class CustomerDataController {
         customerEmailColumn.setCellValueFactory(new PropertyValueFactory<>("customerEmail"));
         customerPhoneColumn.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
 
+        // Add custom styling to the table
+        customerTable.getStyleClass().add("custom-table");
+
         // Set preferred width for columns
-        customerIdColumn.setPrefWidth(100);
-        customerNameColumn.setPrefWidth(150);
-        customerEmailColumn.setPrefWidth(200);
-        customerPhoneColumn.setPrefWidth(150);
+        customerIdColumn.setStyle("-fx-alignment: CENTER;");
+        customerNameColumn.setStyle("-fx-alignment: CENTER-LEFT;");
+        customerEmailColumn.setStyle("-fx-alignment: CENTER-LEFT;");
+        customerPhoneColumn.setStyle("-fx-alignment: CENTER;");
+        actionColumn.setStyle("-fx-alignment: CENTER;");
 
         // Set column resize policy
         customerTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -73,44 +76,54 @@ public class CustomerDataController {
     }
 
     private void addButtonToTable() {
-        Callback<TableColumn<Customer, Void>, TableCell<Customer, Void>> cellFactory = new Callback<>() {
-            @Override
-            public TableCell<Customer, Void> call(final TableColumn<Customer, Void> param) {
-                final TableCell<Customer, Void> cell = new TableCell<>() {
+        actionColumn.setCellFactory(col -> new TableCell<>() {
+            private final Button editButton = new Button("Edit");
+            private final Button deleteButton = new Button("Delete");
+            private final HBox buttonBox = new HBox(5, editButton, deleteButton);
 
-                    private final Button btnEdit = new Button("Edit");
-                    private final Button btnDelete = new Button("Delete");
+            {
+                // Style the edit button
+                editButton.setStyle(
+                        "-fx-background-color: #4CAF50; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-padding: 5 15; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-background-radius: 3;"
+                );
+                editButton.setOnAction(event -> {
+                    Customer data = getTableView().getItems().get(getIndex());
+                    System.out.println("Edit button clicked for Customer ID: " + data.getCustomerId());
+                    // Implement edit functionality
+                });
 
-                    {
-                        btnEdit.setOnAction((event) -> {
-                            Customer data = getTableView().getItems().get(getIndex());
-                            System.out.println("Edit button clicked for Customer ID: " + data.getCustomerId());
-                            // Implement edit functionality
-                        });
-                        btnDelete.setOnAction((event) -> {
-                            Customer data = getTableView().getItems().get(getIndex());
-                            System.out.println("Delete button clicked for Customer ID: " + data.getCustomerId());
-                            deleteCustomer(data);
-                        });
-                    }
+                // Style the delete button
+                deleteButton.setStyle(
+                        "-fx-background-color: #f44336; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-padding: 5 15; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-background-radius: 3;"
+                );
+                deleteButton.setOnAction(event -> {
+                    Customer data = getTableView().getItems().get(getIndex());
+                    System.out.println("Delete button clicked for Customer ID: " + data.getCustomerId());
+                    deleteCustomer(data);
+                });
 
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            HBox hBox = new HBox(btnEdit, btnDelete);
-                            hBox.setSpacing(10);
-                            setGraphic(hBox);
-                        }
-                    }
-                };
-                return cell;
+                // Center the buttons in the cell
+                buttonBox.setAlignment(Pos.CENTER);
             }
-        };
 
-        actionColumn.setCellFactory(cellFactory);
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(buttonBox);
+                }
+            }
+        });
     }
 
     private void deleteCustomer(Customer customer) {
@@ -151,6 +164,14 @@ public class CustomerDataController {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // Style the alert dialog
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-padding: 15px;"
+        );
+
         alert.showAndWait();
     }
 
@@ -159,6 +180,14 @@ public class CustomerDataController {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // Style the alert dialog
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-padding: 15px;"
+        );
+
         alert.showAndWait();
     }
 
@@ -166,6 +195,24 @@ public class CustomerDataController {
         customerNameField.clear();
         customerEmailField.clear();
         customerPhoneField.clear();
+    }
+
+    @FXML
+    private void handleSearch() {
+        String searchText = searchField.getText().toLowerCase();
+        try {
+            List<Customer> allCustomers = DatabaseManager.getAllCustomers();
+            List<Customer> filteredCustomers = allCustomers.stream()
+                    .filter(customer -> customer.getCustomerName().toLowerCase().contains(searchText))
+                    .collect(Collectors.toList());
+            customerTable.getItems().setAll(filteredCustomers);
+
+            // Log the search action
+            System.out.println("Search performed with text: " + searchText);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error performing search.");
+        }
     }
 
     @FXML
